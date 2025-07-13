@@ -37,10 +37,6 @@ export default async function handler(req, res) {
     }).then(r => r.json());
     const tenantToken = tokenRes.tenant_access_token;
 
-    // Log the full tenant token response and value
-    console.log("Lark tenant token response:", JSON.stringify(tokenRes, null, 2));
-    console.log("Tenant token used:", tenantToken);
-
     // 4. Call OpenAI ChatGPT API
     let chatReply = "Sorry, I didn't get that.";
     try {
@@ -61,18 +57,19 @@ export default async function handler(req, res) {
       chatReply = openaiResponse.choices?.[0]?.message?.content || chatReply;
     } catch {}
 
-    // 5. Build the payload and send reply to Lark
+    // 5. Send reply to Lark (use query parameter, not body field!)
     const larkPayload = {
-      receive_id_type: "chat_id",
       receive_id: chat_id,
       msg_type: "text",
       content: JSON.stringify({ text: chatReply })
     };
 
-    // Log payload for debugging
+    // Log payload and URL for debugging
+    const larkUrl = `https://open.larksuite.com/open-apis/im/v1/messages?receive_id_type=chat_id`;
     console.log("Lark payload:", JSON.stringify(larkPayload, null, 2));
+    console.log("Lark API URL:", larkUrl);
 
-    const larkRes = await fetch("https://open.larksuite.com/open-apis/im/v1/messages", {
+    const larkRes = await fetch(larkUrl, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${tenantToken}`,
