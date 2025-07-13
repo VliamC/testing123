@@ -1,7 +1,6 @@
 export default async function handler(req, res) {
   let body = req.body;
 
-  // Parse raw body if not already parsed (Vercel sends it as a string for POST)
   if (!body || typeof body === "string") {
     try {
       body = JSON.parse(body || "");
@@ -9,6 +8,9 @@ export default async function handler(req, res) {
       body = {};
     }
   }
+
+  // Log the body to Vercel function logs (go to Vercel > Functions > logs)
+  console.log('Received body:', body);
 
   if (body.challenge) {
     res.setHeader('Content-Type', 'application/json');
