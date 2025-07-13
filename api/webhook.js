@@ -4,14 +4,14 @@ export default async function handler(req, res) {
     try { body = JSON.parse(body || ""); } catch { body = {}; }
   }
 
-  // 1. Handle Lark verification challenge
+  // 1. Lark verification challenge handler
   if (body.challenge) {
     res.setHeader('Content-Type', 'application/json');
     res.status(200).end(JSON.stringify({ challenge: body.challenge }));
     return;
   }
 
-  // 2. Handle message event (text only)
+  // 2. Lark message event handler
   if (
     body.event &&
     body.event.message &&
@@ -57,13 +57,16 @@ export default async function handler(req, res) {
       chatReply = openaiResponse.choices?.[0]?.message?.content || chatReply;
     } catch {}
 
-    // 5. Build the payload and send reply to Lark
+    // 5. Build payload with correct order and values
     const larkPayload = {
       receive_id_type: "chat_id",
       receive_id: chat_id,
       msg_type: "text",
-      content: JSON.stringify({ text: chatReply })
+      content: JSON.stringify({ text: chatReply }) // must be stringified!
     };
+
+    // Log payload for debugging
+    console.log("Lark payload:", JSON.stringify(larkPayload, null, 2));
 
     const larkRes = await fetch("https://open.larksuite.com/open-apis/im/v1/messages", {
       method: "POST",
