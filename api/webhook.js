@@ -1,8 +1,16 @@
 export default async function handler(req, res) {
-  const body = req.body || {};
+  let body = req.body;
+
+  // Parse raw body if not already parsed (Vercel sends it as a string for POST)
+  if (!body || typeof body === "string") {
+    try {
+      body = JSON.parse(body || "");
+    } catch {
+      body = {};
+    }
+  }
 
   if (body.challenge) {
-    // This is critical: sets header to JSON and sends only the JSON challenge!
     res.setHeader('Content-Type', 'application/json');
     res.status(200).end(JSON.stringify({ challenge: body.challenge }));
     return;
