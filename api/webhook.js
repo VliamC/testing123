@@ -37,6 +37,10 @@ export default async function handler(req, res) {
     }).then(r => r.json());
     const tenantToken = tokenRes.tenant_access_token;
 
+    // Log the full tenant token response and value
+    console.log("Lark tenant token response:", JSON.stringify(tokenRes, null, 2));
+    console.log("Tenant token used:", tenantToken);
+
     // 4. Call OpenAI ChatGPT API
     let chatReply = "Sorry, I didn't get that.";
     try {
@@ -57,12 +61,12 @@ export default async function handler(req, res) {
       chatReply = openaiResponse.choices?.[0]?.message?.content || chatReply;
     } catch {}
 
-    // 5. Build payload with correct order and values
+    // 5. Build the payload and send reply to Lark
     const larkPayload = {
       receive_id_type: "chat_id",
       receive_id: chat_id,
       msg_type: "text",
-      content: JSON.stringify({ text: chatReply }) // must be stringified!
+      content: JSON.stringify({ text: chatReply })
     };
 
     // Log payload for debugging
